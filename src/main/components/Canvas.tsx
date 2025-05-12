@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 
 import connectionLineTypeHandler from '../api/connectionLineTypeHandler';
@@ -97,6 +97,10 @@ export default function Canvas() {
 
   // 노드가 선택되었을 때 해당 노드의 zIndex를 조정하는 커스텀 훅
   useHighlightSelectedEdge(selectedId, edges, setEdges);
+
+  useEffect(() => {
+    console.log('nodes', nodes);
+  }, [selectedId]);
 
   return (
     <div className={`relative h-full w-full`} ref={wrapperRef}>

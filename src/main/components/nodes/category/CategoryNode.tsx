@@ -11,7 +11,7 @@ import { useReactFlow, Handle, Position, useStore } from '@xyflow/react';
 export interface CategoryItemData {
   id: string;
   name: string;
-  value: string;
+  value: string[]; // value는 항상 string[] 타입
   parentId: string | null;
 }
 
@@ -21,7 +21,7 @@ interface CategoryNodeData {
   bounds?: { left: number; top: number; right: number; bottom: number };
 }
 
-export function CategoryNode({
+export default function CategoryNode({
   id,
   data,
   isConnectable,
@@ -31,12 +31,10 @@ export function CategoryNode({
   isConnectable: boolean;
 }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
-
   const { setNodes, getNodes } = useReactFlow();
   const { setNodeType, draggedItem } = useDnDStore();
   const { selectedId } = useSelectedObjectStore();
   const { setEdges } = useReactFlow();
-
   const [isDraggingOver, setIsDraggingOver] = useState(false);
 
   const nodePosition = useStore((store) => {
@@ -95,6 +93,7 @@ export function CategoryNode({
 
     event.dataTransfer.effectAllowed = 'move';
 
+    // item.value가 string[]일 경우, 드래그할 때도 문자열 배열을 처리하도록
     event.dataTransfer.setData('application/reactflow-item', JSON.stringify(item));
   };
 
@@ -112,8 +111,17 @@ export function CategoryNode({
           if (node.id !== id) return node;
           // 이 노드 안의 categories 배열만 업데이트
           const newCategories = (node.data as unknown as CategoryNodeData).categories.map((cat) =>
-            cat.id === itemId ? { ...cat, [field]: newValue } : cat,
+            cat.id === itemId
+              ? {
+                  ...cat,
+                  [field]:
+                    field === 'value'
+                      ? newValue.split(',').map((v) => v.trim()) // 배열로 변환
+                      : newValue,
+                }
+              : cat,
           );
+
           return {
             ...node,
             data: {
@@ -187,8 +195,8 @@ export function CategoryNode({
             </div>
             <input
               type='text'
-              value={item.value}
-              onChange={(e) => handleCategoryChange(item.id, 'value', e.target.value)}
+              value={Array.isArray(item.value) ? item.value.join(', ') : item.value}
+              onChange={(e) => handleCategoryChange(item.id, 'value', e.target.value)} // value는 여전히 배열로 저장
               className='w-full rounded border border-gray-300 bg-[#C9DCF9] p-1 text-sm text-[#5B5B5B]'
             />
           </div>
@@ -197,5 +205,3 @@ export function CategoryNode({
     </div>
   );
 }
-
-export default CategoryNode;

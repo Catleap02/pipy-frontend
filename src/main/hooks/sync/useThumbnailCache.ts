@@ -30,8 +30,10 @@ export function useThumbnailCache(
           canvasHeight: window.innerHeight,
           filter: (node) => {
             if (node.classList) {
-              return !node.classList.contains('react-flow__minimap') && 
-                !node.classList.contains('react-flow__controls');
+              return (
+                !node.classList.contains('react-flow__minimap') &&
+                !node.classList.contains('react-flow__controls')
+              );
             }
             return true;
           },
@@ -53,7 +55,7 @@ export function useThumbnailCache(
           ];
 
           localStorage.setItem(storageKey, JSON.stringify(updatedList));
-          console.log(`✅ 썸네일 저장 완료 (projectId=${projectId})`);
+          // console.log(`✅ 썸네일 저장 완료 (projectId=${projectId})`);
         }
       } catch (err) {
         console.warn('❗ 썸네일 캡처 실패', err);

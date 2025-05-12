@@ -10,7 +10,7 @@ import { Node } from '@xyflow/react';
 
 export interface CategoryNodeItemData {
   name: string;
-  value: string;
+  value: string[]; // value는 배열로 저장
   [key: string]: unknown; // Add index signature to satisfy Record<string, unknown>
   width?: number;
   height?: number;
@@ -23,6 +23,8 @@ function CategoryItemNode({ id, data }: NodeProps<Node<CategoryNodeItemData>>) {
 
   const handleFieldChange = useCallback(
     (field: 'name' | 'value', e: React.ChangeEvent<HTMLInputElement>) => {
+      const rawValue = e.target.value;
+
       setNodes((nds) =>
         nds.map((node) => {
           if (node.id === id) {
@@ -30,7 +32,10 @@ function CategoryItemNode({ id, data }: NodeProps<Node<CategoryNodeItemData>>) {
               ...node,
               data: {
                 ...node.data,
-                [field]: e.target.value,
+                [field]:
+                  field === 'value'
+                    ? rawValue.split(',').map((v) => v.trim()) // 문자열을 배열로
+                    : rawValue,
               },
             };
           }
@@ -81,8 +86,8 @@ function CategoryItemNode({ id, data }: NodeProps<Node<CategoryNodeItemData>>) {
       </div>
       <input
         type='text'
-        value={data.value}
-        onChange={(e) => handleFieldChange('value', e)}
+        value={Array.isArray(data.value) ? data.value.join(', ') : data.value}
+        onChange={(e) => handleFieldChange('value', e)} // value는 여전히 배열로 저장
         className='w-full rounded border border-gray-300 bg-[#C9DCF9] p-1 text-sm text-[#5B5B5B]'
       />
 
